@@ -29,9 +29,9 @@ export class UserService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    if (createUserDto.role === UserRole.ADMIN || createUserDto.role === UserRole.MASTER) {
-      throw new ForbiddenException(exceptions.users.userCreating);
-    }
+    // if (createUserDto.role === UserRole.ADMIN || createUserDto.role === UserRole.MASTER) {
+    //   throw new ForbiddenException(exceptions.users.userCreating);
+    // }
 
     // const newUser = this.usersRepository.create(createUserDto);
     // return this.usersRepository.save(newUser).catch((e) => {
@@ -43,6 +43,7 @@ export class UserService {
     // });
 
     // только для тестирования!!! выше вариант в прод
+    console.log(createUserDto);
     const hash = await this.hashService.generateHash(createUserDto.password);
 
     const newUser = await this.usersRepository.create({

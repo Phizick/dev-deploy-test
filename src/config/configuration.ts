@@ -11,7 +11,7 @@ export default () => ({
     name: process.env.DATABASE_NAME || 'iHelp',
   },
   hash: {
-    salt: Number(process.env.SALT) || 10,
+    salt: String(process.env.SALT) || '10',
   },
   jwt: {
     key: process.env.JWT_KEY || 'e776c17dcf7b8de11a1647faa49b89c2',

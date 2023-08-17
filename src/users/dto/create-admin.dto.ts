@@ -59,7 +59,7 @@ export class CreateAdminDto {
   })
   avatar: string;
 
-  @IsPhoneNumber('RU', { message: validationOptions.messages.incorrectPhoneNumber })
+
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   @ApiProperty({ example: '892177776655' })
   phone: string;

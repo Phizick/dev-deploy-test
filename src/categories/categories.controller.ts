@@ -12,8 +12,8 @@ import { AdminPermissions } from '../auth/decorators/admin-permissions.decorator
 import { Category } from './entities/category.entity';
 
 @ApiTags('Categories')
-@ApiBearerAuth()
-@UseGuards(JwtGuard)
+// @ApiBearerAuth()
+// @UseGuards(JwtGuard)
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
@@ -22,9 +22,9 @@ export class CategoriesController {
     status: 200,
     type: Category,
   })
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
-  @UserRoles(UserRole.ADMIN, UserRole.MASTER)
-  @AdminPermissions(AdminPermission.CATEGORIES)
+  // @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  // @UserRoles(UserRole.ADMIN, UserRole.MASTER)
+  // @AdminPermissions(AdminPermission.CATEGORIES)
   @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
     return this.categoriesService.create(createCategoryDto);

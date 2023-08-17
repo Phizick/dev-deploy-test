@@ -1,10 +1,11 @@
-import { IsArray, IsDate, IsString, IsUrl, Length } from 'class-validator';
+import {IsArray, IsDate, IsString, IsUrl, Length, ValidateNested} from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
 import { Exclude } from 'class-transformer';
 import { ApiResponseProperty } from '@nestjs/swagger';
 import { AdminPermission, UserRole, UserStatus } from '../types';
 import validationOptions from '../../common/constants/validation-options';
+
 
 @Entity()
 export class User {
@@ -15,7 +16,7 @@ export class User {
   @ApiResponseProperty()
   @Column()
   @IsString()
-  @Length(validationOptions.limits.userName.min, validationOptions.limits.userName.max)
+  // @Length(validationOptions.limits.userName.min, validationOptions.limits.userName.max)
   fullname: string;
 
   @ApiResponseProperty()

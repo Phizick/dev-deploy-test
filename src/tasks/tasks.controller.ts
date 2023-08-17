@@ -28,9 +28,9 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { Task } from './entities/task.entity';
 import { TaskQueryDto } from './dto/task-query.dto';
 
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiTags('Tasks')
-@UseGuards(JwtGuard)
+// @UseGuards(JwtGuard)
 @Controller('tasks')
 export class TasksController {
   constructor(
@@ -42,9 +42,9 @@ export class TasksController {
     status: 200,
     type: Task,
   })
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
-  @UserRoles(UserRole.RECIPIENT, UserRole.ADMIN, UserRole.MASTER)
-  @AdminPermissions(AdminPermission.TASKS)
+  // @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  // @UserRoles(UserRole.RECIPIENT, UserRole.ADMIN, UserRole.MASTER)
+  // @AdminPermissions(AdminPermission.TASKS)
   @Post()
   async create(
     @Body(new ValidationPipe({ whitelist: true })) createTaskDto: CreateTaskDto,
@@ -69,8 +69,8 @@ export class TasksController {
     type: Task,
     isArray: true,
   })
-  @UseGuards(UserRolesGuard)
-  @UserRoles(UserRole.ADMIN, UserRole.MASTER)
+  // @UseGuards(UserRolesGuard)
+  // @UserRoles(UserRole.ADMIN, UserRole.MASTER)
   @Get('find')
   async findBy(@Query() query: object): Promise<Task[]> {
     return this.tasksService.findBy(query);
@@ -81,8 +81,8 @@ export class TasksController {
     type: Task,
     isArray: true,
   })
-  @UseGuards(UserRolesGuard)
-  @UserRoles(UserRole.RECIPIENT, UserRole.VOLUNTEER)
+  // @UseGuards(UserRolesGuard)
+  // @UserRoles(UserRole.RECIPIENT, UserRole.VOLUNTEER)
   @Get('own')
   async findOwn(@Query('status') status: string, @AuthUser() user: User): Promise<Task[]> {
     return this.tasksService.findOwn(status, user);
@@ -93,8 +93,8 @@ export class TasksController {
     type: Task,
     isArray: true,
   })
-  @UseGuards(UserRolesGuard)
-  @UserRoles(UserRole.ADMIN, UserRole.MASTER)
+  // @UseGuards(UserRolesGuard)
+  // @UserRoles(UserRole.ADMIN, UserRole.MASTER)
   @Get()
   async findAll(): Promise<Task[]> {
     return this.tasksService.findAll();
@@ -113,8 +113,8 @@ export class TasksController {
     status: 200,
     type: Task,
   })
-  @UseGuards(UserRolesGuard)
-  @UserRoles(UserRole.VOLUNTEER)
+  // @UseGuards(UserRolesGuard)
+  // @UserRoles(UserRole.VOLUNTEER)
   @Patch(':id/accept')
   async acceptTask(@Param('id') taskId: string, @AuthUser() user: User): Promise<Task> {
     const acceptedTask = await this.tasksService.acceptTask(taskId, user);
@@ -134,9 +134,9 @@ export class TasksController {
     status: 200,
     type: Task,
   })
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
-  @UserRoles(UserRole.VOLUNTEER, UserRole.ADMIN, UserRole.MASTER)
-  @AdminPermissions(AdminPermission.TASKS, AdminPermission.CONFLICTS)
+  // @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  // @UserRoles(UserRole.VOLUNTEER, UserRole.ADMIN, UserRole.MASTER)
+  // @AdminPermissions(AdminPermission.TASKS, AdminPermission.CONFLICTS)
   @Patch(':id/refuse')
   async refuseTask(@Param('id') id: string, @AuthUser() user: User): Promise<Task> {
     const refusedTask = await this.tasksService.refuseTask(id, user);
@@ -156,9 +156,9 @@ export class TasksController {
     status: 200,
     type: Task,
   })
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
-  @UserRoles(UserRole.RECIPIENT, UserRole.ADMIN, UserRole.MASTER)
-  @AdminPermissions(AdminPermission.TASKS)
+  // @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  // @UserRoles(UserRole.RECIPIENT, UserRole.ADMIN, UserRole.MASTER)
+  // @AdminPermissions(AdminPermission.TASKS)
   @Delete(':id')
   async deleteTask(@Param('id') id: string, @AuthUser() user: User): Promise<Task> {
     const deletedTask = await this.tasksService.removeTask(id, user);
@@ -178,9 +178,9 @@ export class TasksController {
     status: 200,
     type: Task,
   })
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
-  @UserRoles(UserRole.ADMIN, UserRole.MASTER)
-  @AdminPermissions(AdminPermission.TASKS, AdminPermission.CONFLICTS)
+  // @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  // @UserRoles(UserRole.ADMIN, UserRole.MASTER)
+  // @AdminPermissions(AdminPermission.TASKS, AdminPermission.CONFLICTS)
   @Patch(':id/close')
   async closeTask(@Param('id') id: string, @Query('completed') completed: boolean): Promise<Task> {
     const closedTask = await this.tasksService.closeTask(id, completed);
@@ -200,8 +200,8 @@ export class TasksController {
     status: 200,
     type: Task,
   })
-  @UseGuards(UserRolesGuard)
-  @UserRoles(UserRole.RECIPIENT, UserRole.VOLUNTEER)
+  // @UseGuards(UserRolesGuard)
+  // @UserRoles(UserRole.RECIPIENT, UserRole.VOLUNTEER)
   @Patch(':id/confirm')
   async confirmTask(
     @Param('id') id: string,
@@ -215,9 +215,9 @@ export class TasksController {
     status: 200,
     type: Task,
   })
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
-  @UserRoles(UserRole.RECIPIENT, UserRole.ADMIN, UserRole.MASTER)
-  @AdminPermissions(AdminPermission.TASKS, AdminPermission.CONFLICTS)
+  // @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  // @UserRoles(UserRole.RECIPIENT, UserRole.ADMIN, UserRole.MASTER)
+  // @AdminPermissions(AdminPermission.TASKS, AdminPermission.CONFLICTS)
   @Patch(':id')
   async update(
     @Param('id') id: string,

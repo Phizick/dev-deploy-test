@@ -30,42 +30,42 @@ export class TasksService {
   async create(createTaskDto: CreateTaskDto, ownUser: User): Promise<Task> {
     const { recipientId, ...taskInfo } = createTaskDto;
 
-    if (timeDifference(new Date(), taskInfo.completionDate) <= 0) {
-      throw new ForbiddenException(exceptions.tasks.wrongCompletionDate);
-    }
-
-    let recipient: User;
-    if (ownUser.role === UserRole.RECIPIENT) {
-      recipient = ownUser;
-    } else {
-      const recipientObjectId = new ObjectId(recipientId);
-      recipient = await this.userRepository.findOneBy({ _id: recipientObjectId });
-      if (!recipient) {
-        throw new NotFoundException(exceptions.users.notFound);
-      }
-    }
-
-    if (recipient.role !== 'recipient') {
-      throw new ForbiddenException(exceptions.users.onlyForRecipients);
-    }
-
-    if (recipient.status < UserStatus.CONFIRMED) {
-      throw new ForbiddenException(exceptions.tasks.wrongStatus);
-    }
-
-    const category = await this.categoryRepository.findOneBy({
-      _id: new ObjectId(taskInfo.categoryId),
-    });
-
-    if (!category) {
-      throw new NotFoundException(exceptions.categories.notFound);
-    }
+    // if (timeDifference(new Date(), taskInfo.completionDate) <= 0) {
+    //   throw new ForbiddenException(exceptions.tasks.wrongCompletionDate);
+    // }
+    //
+    // let recipient: User;
+    // if (ownUser.role === UserRole.RECIPIENT) {
+    //   recipient = ownUser;
+    // } else {
+    //   const recipientObjectId = new ObjectId(recipientId);
+    //   recipient = await this.userRepository.findOneBy({ _id: recipientObjectId });
+    //   if (!recipient) {
+    //     throw new NotFoundException(exceptions.users.notFound);
+    //   }
+    // }
+    //
+    // if (recipient.role !== 'recipient') {
+    //   throw new ForbiddenException(exceptions.users.onlyForRecipients);
+    // }
+    //
+    // // if (recipient.status < UserStatus.CONFIRMED) {
+    // //   throw new ForbiddenException(exceptions.tasks.wrongStatus);
+    // // }
+    //
+    // const category = await this.categoryRepository.findOneBy({
+    //   _id: new ObjectId(taskInfo.categoryId),
+    // });
+    //
+    // if (!category) {
+    //   throw new NotFoundException(exceptions.categories.notFound);
+    // }
 
     const dto = {
       ...taskInfo,
-      recipientId: recipient._id.toString(),
-      points: category.points,
-      accessStatus: category.accessStatus,
+      // recipientId: recipient._id.toString(),
+      // points: category.points,
+      // accessStatus: category.accessStatus,
     };
 
     const newTask = await this.taskRepository.create(dto);

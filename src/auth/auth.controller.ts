@@ -17,7 +17,7 @@ export class AuthController {
     status: 200,
     type: SigninResponseDto,
   })
-  @UseGuards(LocalGuard)
+  // @UseGuards(LocalGuard)
   @Post('signin')
   async signin(@AuthUser() user: User, @Body() signinDto: SigninDto): Promise<SigninResponseDto> {
     return this.authService.auth(user);

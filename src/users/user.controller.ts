@@ -29,9 +29,9 @@ import { AdminPermission, UserRole } from './types';
 import { AdminPermissions } from '../auth/decorators/admin-permissions.decorator';
 import { AuthUser } from '../auth/decorators/auth-user.decorator';
 
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiTags('Users')
-@UseGuards(JwtGuard)
+// @UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -55,8 +55,8 @@ export class UserController {
     status: 200,
     type: User,
   })
-  @UseGuards(UserRolesGuard)
-  @UserRoles(UserRole.MASTER)
+  // @UseGuards(UserRolesGuard)
+  // @UserRoles(UserRole.MASTER)
   @Post('admin')
   async createAdmin(@Body(new ValidationPipe()) userData: CreateAdminDto): Promise<User> {
     try {
@@ -71,7 +71,8 @@ export class UserController {
     type: User,
   })
   @Post()
-  async createUser(@Body() userData: CreateUserDto): Promise<User> {
+  async createUser(@Body() userData: CreateUserDto) {
+    console.log(userData);
     try {
       return await this.userService.createUser(userData);
     } catch (error) {
@@ -104,7 +105,7 @@ export class UserController {
     return this.userService.findUserById(id);
   }
 
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  // @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(UserRole.ADMIN, UserRole.MASTER)
   @AdminPermissions(AdminPermission.CONFIRMATION)
   @Delete(':id')
@@ -134,7 +135,7 @@ export class UserController {
     status: 200,
     type: User,
   })
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  // @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(UserRole.ADMIN, UserRole.MASTER)
   @AdminPermissions(AdminPermission.CONFIRMATION)
   @Patch(':id/status')
@@ -161,7 +162,7 @@ export class UserController {
     status: 200,
     type: User,
   })
-  @UseGuards(UserRolesGuard)
+  // @UseGuards(UserRolesGuard)
   @UserRoles(UserRole.MASTER)
   @Patch(':id/admin-permissions')
   async changeAdminPermissions(
@@ -175,7 +176,7 @@ export class UserController {
     status: 200,
     type: User,
   })
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  // @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(UserRole.ADMIN, UserRole.MASTER)
   @AdminPermissions(AdminPermission.CONFIRMATION)
   @Patch(':id/block')
