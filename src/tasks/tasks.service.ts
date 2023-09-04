@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { DataSource, MongoRepository, Repository } from 'typeorm';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { NotFoundException } from '@nestjs/common/exceptions';
@@ -9,9 +10,11 @@ import { User } from '../users/entities/user.entity';
 import exceptions from '../common/constants/exceptions';
 import { Category } from '../categories/entities/category.entity';
 import timeDifference from '../common/utils/timeDifference';
-import { UserRole, UserStatus } from '../users/types';
+
+import { EUserRole, UserStatus } from '../users/types';
+
 import { TaskStatus } from './types';
-import { dayInMs } from '../common/constants';
+import {dayInMs, pointsTo2Status} from '../common/constants';
 import queryRunner from '../common/helpers/queryRunner';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
@@ -30,42 +33,54 @@ export class TasksService {
   async create(createTaskDto: CreateTaskDto, ownUser: User): Promise<Task> {
     const { recipientId, ...taskInfo } = createTaskDto;
 
-    // if (timeDifference(new Date(), taskInfo.completionDate) <= 0) {
-    //   throw new ForbiddenException(exceptions.tasks.wrongCompletionDate);
-    // }
-    //
-    // let recipient: User;
-    // if (ownUser.role === UserRole.RECIPIENT) {
-    //   recipient = ownUser;
-    // } else {
-    //   const recipientObjectId = new ObjectId(recipientId);
-    //   recipient = await this.userRepository.findOneBy({ _id: recipientObjectId });
-    //   if (!recipient) {
-    //     throw new NotFoundException(exceptions.users.notFound);
-    //   }
-    // }
-    //
-    // if (recipient.role !== 'recipient') {
-    //   throw new ForbiddenException(exceptions.users.onlyForRecipients);
-    // }
-    //
-    // // if (recipient.status < UserStatus.CONFIRMED) {
-    // //   throw new ForbiddenException(exceptions.tasks.wrongStatus);
-    // // }
-    //
-    // const category = await this.categoryRepository.findOneBy({
-    //   _id: new ObjectId(taskInfo.categoryId),
-    // });
-    //
-    // if (!category) {
-    //   throw new NotFoundException(exceptions.categories.notFound);
-    // }
+    if (timeDifference(new Date(), taskInfo.completionDate) <= 0) {
+      throw new ForbiddenException(exceptions.tasks.wrongCompletionDate);
+    }
+
+    let recipient: User;
+    if (ownUser.role === EUserRole.RECIPIENT) {
+      recipient = ownUser;
+    } else {
+      const recipientObjectId = new ObjectId(recipientId);
+      recipient = await this.userRepository.findOneBy({ _id: recipientObjectId });
+      if (!recipient) {
+        throw new NotFoundException(exceptions.users.notFound);
+      }
+    }
+
+    const sameTask = await this.taskRepository.findOne({
+      where: {
+        recipientId: recipient._id.toString(),
+        categoryId: createTaskDto.categoryId,
+        status: { $in: [TaskStatus.CREATED, TaskStatus.ACCEPTED] },
+      },
+    });
+
+    if (sameTask) {
+      throw new ForbiddenException(exceptions.tasks.sameTask);
+    }
+
+    if (recipient.role !== 'recipient') {
+      throw new ForbiddenException(exceptions.users.onlyForRecipients);
+    }
+
+    if (recipient.status < UserStatus.CONFIRMED) {
+      throw new ForbiddenException(exceptions.tasks.wrongStatus);
+    }
+
+    const category = await this.categoryRepository.findOneBy({
+      _id: new ObjectId(taskInfo.categoryId),
+    });
+
+    if (!category) {
+      throw new NotFoundException(exceptions.categories.notFound);
+    }
 
     const dto = {
       ...taskInfo,
-      // recipientId: recipient._id.toString(),
-      // points: category.points,
-      // accessStatus: category.accessStatus,
+      recipientId: recipient._id.toString(),
+      points: category.points,
+      accessStatus: category.accessStatus,
     };
 
     const newTask = await this.taskRepository.create(dto);
@@ -86,8 +101,8 @@ export class TasksService {
     }
 
     if (
-      (user.role === UserRole.RECIPIENT && task.recipientId !== user._id.toString()) ||
-      (user.role === UserRole.VOLUNTEER &&
+      (user.role === EUserRole.RECIPIENT && task.recipientId !== user._id.toString()) ||
+      (user.role === EUserRole.VOLUNTEER &&
         task.volunteerId !== user._id.toString() &&
         task.status !== TaskStatus.CREATED)
     ) {
@@ -116,7 +131,7 @@ export class TasksService {
       ? statuses.split(',')
       : [TaskStatus.CREATED, TaskStatus.ACCEPTED, TaskStatus.CLOSED];
 
-    if (user.role === UserRole.RECIPIENT) {
+    if (user.role === EUserRole.RECIPIENT) {
       return this.taskRepository.find({
         where: { status: { $in: statusArray }, recipientId: user._id.toString() },
       });
@@ -138,7 +153,7 @@ export class TasksService {
       throw new ForbiddenException(exceptions.tasks.onlyForCreated);
     }
 
-    if (user.role !== UserRole.VOLUNTEER) {
+    if (user.role !== EUserRole.VOLUNTEER) {
       throw new ForbiddenException(exceptions.users.onlyForVolunteers);
     }
 
@@ -170,13 +185,14 @@ export class TasksService {
     }
 
     if (
+      task.completionDate &&
       timeDifference(new Date(), task.completionDate) < dayInMs &&
-      user.role === UserRole.VOLUNTEER
+      user.role === EUserRole.VOLUNTEER
     ) {
       throw new ForbiddenException(exceptions.tasks.noTimeForRefusal);
     }
 
-    if (task.volunteerId !== user._id.toString() && user.role === UserRole.VOLUNTEER) {
+    if (task.volunteerId !== user._id.toString() && user.role === EUserRole.VOLUNTEER) {
       throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 
@@ -196,11 +212,11 @@ export class TasksService {
       throw new NotFoundException(exceptions.tasks.notFound);
     }
 
-    if (task.recipientId !== user._id.toString() && user.role === UserRole.RECIPIENT) {
+    if (task.recipientId !== user._id.toString() && user.role === EUserRole.RECIPIENT) {
       throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 
-    if (task.volunteerId && user.role === UserRole.RECIPIENT) {
+    if (task.volunteerId && user.role === EUserRole.RECIPIENT) {
       throw new ForbiddenException(exceptions.tasks.cancelForbidden);
     }
 
@@ -228,9 +244,17 @@ export class TasksService {
       ),
       this.userRepository.update(
         { _id: objectVolunteerId },
-        { scores: volunteer.scores + task.points }
+        { scores: volunteer.scores + task.points, completedTasks: volunteer.completedTasks + 1 }
       ),
     ]);
+
+    if (volunteer.completedTasks + 1 === pointsTo2Status) {
+      console.log('Отбивка в чат админу');
+    }
+
+    if (volunteer.completedTasks + 1 === pointsTo2Status) {
+      console.log('Отбивка в чат админу');
+    }
   }
 
   async closeTask(taskId: string, completed: boolean) {
@@ -318,7 +342,7 @@ export class TasksService {
       throw new ForbiddenException(exceptions.tasks.onlyForCreated);
     }
 
-    if (task.recipientId !== user._id.toString() && user.role === UserRole.RECIPIENT) {
+    if (task.recipientId !== user._id.toString() && user.role === EUserRole.RECIPIENT) {
       throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 

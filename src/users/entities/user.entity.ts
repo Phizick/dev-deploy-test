@@ -1,11 +1,13 @@
-import {IsArray, IsDate, IsString, IsUrl, Length, ValidateNested} from 'class-validator';
+import { IsArray, IsDate, IsNumber, IsString, IsUrl, Length } from 'class-validator';
+
 import { Column, CreateDateColumn, Entity, Index, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
 import { Exclude } from 'class-transformer';
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { AdminPermission, UserRole, UserStatus } from '../types';
-import validationOptions from '../../common/constants/validation-options';
 
+import { AdminPermission, EUserRole, UserStatus } from '../types';
+
+import validationOptions from '../../common/constants/validation-options';
 
 @Entity()
 export class User {
@@ -16,13 +18,25 @@ export class User {
   @ApiResponseProperty()
   @Column()
   @IsString()
-  // @Length(validationOptions.limits.userName.min, validationOptions.limits.userName.max)
+  @Length(validationOptions.limits.userName.min, validationOptions.limits.userName.max)
   fullname: string;
 
   @ApiResponseProperty()
   @Column()
   @IsString()
-  role: UserRole;
+  role: EUserRole;
+
+  @ApiResponseProperty()
+  @IsNumber()
+  @Column()
+  @Index()
+  vkId?: number;
+
+  @ApiResponseProperty()
+  @Column()
+  @IsUrl()
+  @Index()
+  vkLink?: string;
 
   @Column()
   @IsString()
@@ -43,12 +57,6 @@ export class User {
   @ApiResponseProperty()
   @Column()
   isBlocked = false;
-
-  @ApiResponseProperty()
-  @Column()
-  @IsUrl()
-  @Index({ unique: true })
-  vk: string;
 
   @ApiResponseProperty()
   @Column()
@@ -88,4 +96,8 @@ export class User {
   @Column()
   @IsArray()
   permissions?: AdminPermission[];
+
+  @ApiResponseProperty()
+  @Column()
+  completedTasks: number = 0;
 }

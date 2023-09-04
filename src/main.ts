@@ -6,12 +6,11 @@ import configuration from './config/configuration';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   app.useGlobalPipes(
     new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true })
   );
-
-  app.enableCors({ origin: configuration().server.cors_origins.split(',') });
+  // app.enableCors({ origin: configuration().server.cors_origins.split(',') });
+  app.enableCors({ origin: '*' });
 
   const config = new DocumentBuilder()
     .setTitle('ЯПомогаю')
@@ -22,19 +21,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/api', app, document);
 
-  // app.use((req, res, next) => {
-  //   let body = '';
-  //   req.on('data', (chunk) => {
-  //     body += chunk.toString();
-  //   });
-  //   req.on('end', () => {
-  //     console.log('Data from request body:', JSON.parse(body));
-  //     next();
-  //   });
-  // });
-
   await app.listen(configuration().server.port);
-  console.log(`Running on: ${await app.getUrl()}`);
-}
 
+  console.info(`running on: ${await app.getUrl()}`);
+}
 bootstrap();
