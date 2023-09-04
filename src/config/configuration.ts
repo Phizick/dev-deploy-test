@@ -14,7 +14,7 @@ export default () => ({
   vk: {
     appId: process.env.VK_APP_ID || '51729194',
     appSecret: process.env.VK_APP_SECRET || 'lyxbTQRoOzpKBX4PqjWm',
-    redirectUri: process.env.VK_APP_REDIRECT_URI || 'http://127.0.0.1:3001/callback',
+    redirectUri: process.env.VK_APP_REDIRECT_URI || 'https://api.kraev.nomoredomains.xyz/callback',
   },
   jwt: {
     key: process.env.JWT_KEY || 'e776c17dcf7b8de11a1647faa49b89c2',
