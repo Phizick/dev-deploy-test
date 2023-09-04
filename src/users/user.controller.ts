@@ -112,8 +112,8 @@ export class UserController {
     status: 403,
     description: exceptions.users.onlyForMaster,
   })
-  @UseGuards(UserRolesGuard)
-  @UserRoles(EUserRole.MASTER)
+  // @UseGuards(UserRolesGuard)
+  // @UserRoles(EUserRole.MASTER)
   @Post('admin')
   async createAdmin(@Body() userData: CreateAdminDto): Promise<User> {
     try {
