@@ -43,9 +43,9 @@ import exceptions from '../common/constants/exceptions';
 import { Task } from '../tasks/entities/task.entity';
 import { UserQueryDto } from './dto/user-query.dto';
 
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiTags('Users')
-@UseGuards(JwtGuard)
+// @UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
