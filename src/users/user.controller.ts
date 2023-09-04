@@ -43,9 +43,9 @@ import exceptions from '../common/constants/exceptions';
 import { Task } from '../tasks/entities/task.entity';
 import { UserQueryDto } from './dto/user-query.dto';
 
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiTags('Users')
-@UseGuards(JwtGuard)
+// @UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -101,19 +101,19 @@ export class UserController {
     description:
       'Доступ только для главного администратора. Администраторы создаются со статусом 3 (максимальный). Права устанавливаются в массиве permissions - все доступные перечислены в примере.',
   })
-  @ApiUnauthorizedResponse({
-    type: ApiUnauthorized,
-  })
-  @ApiOkResponse({
-    status: 200,
-    type: User,
-  })
-  @ApiForbiddenResponse({
-    status: 403,
-    description: exceptions.users.onlyForMaster,
-  })
-  @UseGuards(UserRolesGuard)
-  @UserRoles(EUserRole.MASTER)
+  // @ApiUnauthorizedResponse({
+  //   type: ApiUnauthorized,
+  // })
+  // @ApiOkResponse({
+  //   status: 200,
+  //   type: User,
+  // })
+  // @ApiForbiddenResponse({
+  //   status: 403,
+  //   description: exceptions.users.onlyForMaster,
+  // })
+  // @UseGuards(UserRolesGuard)
+  // @UserRoles(EUserRole.MASTER)
   @Post('admin')
   async createAdmin(@Body() userData: CreateAdminDto): Promise<User> {
     try {
