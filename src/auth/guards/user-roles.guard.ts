@@ -1,37 +1,31 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../decorators/user-roles.decorator';
-
-import { EUserRole } from '../../users/types';
-
+import { JwtService } from '@nestjs/jwt';
 import exceptions from '../../common/constants/exceptions';
+
 
 @Injectable()
 export class UserRolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const roles = this.reflector.getAllAndOverride<EUserRole[]>(ROLES_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const roles = context.getHandler()?.constructor?.prototype?.roles;
     if (!roles) {
       return true;
     }
 
-    console.log(`user-roles.guard.ts - 1) Маршрут доступен для ролей: ${roles}`);
+    console.log(`Маршрут доступен для ролей: ${roles}`);
 
-    const { user } = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest();
+    const token = request.headers.authorization?.replace(/Bearer\s/, '');
+    const decoded: any = this.jwtService.decode(token);
 
-    console.log(
-      `user-roles.guard.ts - 2) Пользователь извлечен из контекста для получения его роли: ${user}`
-    );
+    console.log(`Пользователь извлечен из токена для получения его роли: ${decoded}`);
 
-    if (!user) {
+    if (!decoded || !decoded.role) {
       throw new UnauthorizedException(exceptions.auth.unauthorized);
     }
 
-    return roles.some((role) => role === user.role);
+    return roles.some((role) => role === decoded.role);
   }
 }

@@ -57,7 +57,6 @@ export class UserService {
       if (e.code === exceptions.dbCodes.notUnique) {
         throw new BadRequestException(exceptions.users.notUniqueVk);
       }
-
       return e;
     });
   }
