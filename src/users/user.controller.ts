@@ -149,9 +149,9 @@ export class UserController {
   @Get('own')
   async getOwnUser(@AuthUser() user: User): Promise<Omit<User, 'login'> | undefined> {
     try {
-      return await this.userService.findUserById(user._id.toString());
+      return await this.userService.findUserById(user?._id.toString());
     } catch (error) {
-      console.error('Ошибка при получении информации о пользователе:', error);
+      console.error('Ошибка при получении информации о пользователе:', user);
       throw new InternalServerErrorException(
         'Произошла ошибка при получении информации о пользователе'
       );
