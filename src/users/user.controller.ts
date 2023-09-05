@@ -155,7 +155,6 @@ export class UserController {
       const { user } = request;
       console.log(user);
 
-
       return await this.userService.findUserById(user._id.toString());
     } catch (error) {
       console.error('Ошибка при получении информации о пользователе:', error);
