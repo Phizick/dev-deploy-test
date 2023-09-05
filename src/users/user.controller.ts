@@ -63,7 +63,7 @@ export class UserController {
     status: 403,
     description: exceptions.users.onlyForAdmins,
   })
-  @UseGuards(UserRolesGuard)
+  // @UseGuards(UserRolesGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @Get()
   async findAll(): Promise<Omit<User, 'login' | 'password'>[]> {
@@ -89,7 +89,7 @@ export class UserController {
     status: 403,
     description: exceptions.users.onlyForAdmins,
   })
-  @UseGuards(UserRolesGuard)
+  // @UseGuards(UserRolesGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @Get('find')
   async findBy(@Query() query: object): Promise<User[]> {
