@@ -154,9 +154,9 @@ export class UserController {
     try {
       const { user } = request;
       console.log(user);
-      console.log(request);
 
-      return await this.userService.findUserById(user?._id.toString());
+
+      return await this.userService.findUserById(user._id.toString());
     } catch (error) {
       console.error('Ошибка при получении информации о пользователе:', error);
       throw new InternalServerErrorException(
