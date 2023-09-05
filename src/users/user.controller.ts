@@ -9,7 +9,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
+  Query, Req,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -43,6 +43,9 @@ import exceptions from '../common/constants/exceptions';
 import { Task } from '../tasks/entities/task.entity';
 import { UserQueryDto } from './dto/user-query.dto';
 
+interface AuthenticatedRequest extends Request {
+  user: User;
+}
 @ApiBearerAuth()
 @ApiTags('Users')
 // @UseGuards(JwtGuard)
@@ -147,11 +150,15 @@ export class UserController {
     type: User,
   })
   @Get('own')
-  async getOwnUser(@AuthUser() user: User): Promise<Omit<User, 'login'> | undefined> {
+  async getOwnUser(@Req() request: AuthenticatedRequest): Promise<Omit<User, 'login'> | undefined> {
     try {
+      const { user } = request;
+      console.log(user);
+      console.log(request);
+
       return await this.userService.findUserById(user?._id.toString());
     } catch (error) {
-      console.error('Ошибка при получении информации о пользователе:', user);
+      console.error('Ошибка при получении информации о пользователе:', error);
       throw new InternalServerErrorException(
         'Произошла ошибка при получении информации о пользователе'
       );
