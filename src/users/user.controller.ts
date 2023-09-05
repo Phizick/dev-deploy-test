@@ -45,7 +45,7 @@ import { Task } from '../tasks/entities/task.entity';
 import { UserQueryDto } from './dto/user-query.dto';
 
 interface AuthenticatedRequest extends Request {
-  user: User;
+  _id: string;
 }
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -151,13 +151,13 @@ export class UserController {
     type: User,
   })
   @Get('own')
-  async getOwnUser(@Body() body: AuthenticatedRequest): Promise<Omit<User, 'login'> | undefined> {
+  async getOwnUser(@Body() body: AuthenticatedRequest): Promise<Omit<User, 'login'>> {
     try {
-      const { user } = body;
-      console.log(user);
+      const { _id } = body;
+      console.log(_id);
       console.log('body body', body);
 
-      return await this.userService.findUserById(user._id.toString());
+      return await this.userService.findUserById(_id.toString());
     } catch (error) {
       console.error('Ошибка при получении информации о пользователе:', error);
       throw new InternalServerErrorException(
