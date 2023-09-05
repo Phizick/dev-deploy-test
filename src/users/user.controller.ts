@@ -153,7 +153,7 @@ export class UserController {
   async getOwnUser(@Req() request: AuthenticatedRequest): Promise<Omit<User, 'login'> | undefined> {
     try {
       const { user } = request;
-      console.log(user);
+      console.log(request);
 
       return await this.userService.findUserById(user._id.toString());
     } catch (error) {
