@@ -1,5 +1,5 @@
 import {
-  Body,
+
   Controller,
   Delete,
   Get,
@@ -24,6 +24,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { Body } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -150,10 +151,11 @@ export class UserController {
     type: User,
   })
   @Get('own')
-  async getOwnUser(@Req() request: AuthenticatedRequest): Promise<Omit<User, 'login'> | undefined> {
+  async getOwnUser(@Body() body: AuthenticatedRequest): Promise<Omit<User, 'login'> | undefined> {
     try {
-      const { user } = request;
-      console.log(request);
+      const { user } = body;
+      console.log(user);
+      console.log('body body', body);
 
       return await this.userService.findUserById(user._id.toString());
     } catch (error) {
