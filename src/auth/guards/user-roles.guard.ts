@@ -20,19 +20,12 @@ export class UserRolesGuard implements CanActivate {
       return true;
     }
 
-    console.log(`user-roles.guard.ts - 1) Маршрут доступен для ролей: ${roles}`);
+    const { user } = context.switchToHttp().getRequest();
 
-    const { params } = context.switchToHttp().getRequest();
-    console.log(context.switchToHttp().getRequest());
-
-    console.log(
-      `user-roles.guard.ts - 2) Пользователь извлечен из контекста для получения его роли: ${params.id}`
-    );
-
-    if (!params.id) {
+    if (!user) {
       throw new UnauthorizedException(exceptions.auth.unauthorized);
     }
 
-    return roles.some((role) => role === params.id.role);
+    return roles.some((role) => role === user.role);
   }
 }

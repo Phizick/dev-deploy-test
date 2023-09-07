@@ -1,5 +1,5 @@
 import {
-
+  Body,
   Controller,
   Delete,
   Get,
@@ -9,7 +9,7 @@ import {
   Param,
   Patch,
   Post,
-  Query, Req,
+  Query,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -24,7 +24,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { Body } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -43,62 +42,15 @@ import { ApiUnauthorized } from '../auth/types/unauthorized';
 import exceptions from '../common/constants/exceptions';
 import { Task } from '../tasks/entities/task.entity';
 import { UserQueryDto } from './dto/user-query.dto';
+import { GenerateReportDto } from './dto/generate-report.dto';
+import {BypassAuth} from "../auth/decorators/bypass-auth.decorator";
 
-interface AuthenticatedRequest extends Request {
-  _id: string;
-}
 @ApiBearerAuth()
 @ApiTags('Users')
-// @UseGuards(JwtGuard)
+@UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @ApiOperation({
-    summary: 'Список всех пользователей',
-    description: 'Доступ только для администраторов',
-  })
-  @ApiOkResponse({
-    status: 200,
-    type: User,
-    isArray: true,
-  })
-  @ApiForbiddenResponse({
-    status: 403,
-    description: exceptions.users.onlyForAdmins,
-  })
-  // @UseGuards(UserRolesGuard)
-  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
-  @Get()
-  async findAll(): Promise<Omit<User, 'login' | 'password'>[]> {
-    try {
-      return await this.userService.findAll();
-    } catch (error) {
-      console.error('Ошибка при получении данных пользователей:', error);
-      throw new InternalServerErrorException('Произошла ошибка при получении данных пользователей');
-    }
-  }
-
-  @ApiOperation({
-    summary: 'Поиск пользователей по параметрам',
-    description: 'Доступ только для администраторов',
-  })
-  @ApiQuery({ type: UserQueryDto })
-  @ApiOkResponse({
-    status: 200,
-    type: Task,
-    isArray: true,
-  })
-  @ApiForbiddenResponse({
-    status: 403,
-    description: exceptions.users.onlyForAdmins,
-  })
-  // @UseGuards(UserRolesGuard)
-  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
-  @Get('find')
-  async findBy(@Query() query: object): Promise<User[]> {
-    return this.userService.findBy(query);
-  }
 
   @ApiOperation({
     summary: 'Создание администратора',
@@ -118,6 +70,7 @@ export class UserController {
   })
   // @UseGuards(UserRolesGuard)
   // @UserRoles(EUserRole.MASTER)
+  @BypassAuth() // убрать в проде!!!
   @Post('admin')
   async createAdmin(@Body() userData: CreateAdminDto): Promise<User> {
     try {
@@ -144,6 +97,27 @@ export class UserController {
   }
 
   @ApiOperation({
+    summary: 'Поиск пользователей по параметрам',
+    description: 'Доступ только для администраторов',
+  })
+  @ApiQuery({ type: UserQueryDto })
+  @ApiOkResponse({
+    status: 200,
+    type: Task,
+    isArray: true,
+  })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @Get('find')
+  async findBy(@Query() query: object): Promise<User[]> {
+    return this.userService.findBy(query);
+  }
+
+  @ApiOperation({
     summary: 'Данные о текущем авторизованном пользователе',
   })
   @ApiOkResponse({
@@ -151,18 +125,61 @@ export class UserController {
     type: User,
   })
   @Get('own')
-  async getOwnUser(@Body() body: AuthenticatedRequest): Promise<Omit<User, 'login'>> {
+  async getOwnUser(@AuthUser() user: User): Promise<Omit<User, 'login'> | undefined> {
     try {
-      const { _id } = body;
-      console.log(_id);
-      console.log('body body', body);
-
-      return await this.userService.findUserById(_id.toString());
+      return await this.userService.findUserById(user._id.toString());
     } catch (error) {
       console.error('Ошибка при получении информации о пользователе:', error);
       throw new InternalServerErrorException(
         'Произошла ошибка при получении информации о пользователе'
       );
+    }
+  }
+
+  @ApiOperation({
+    summary: 'Список пользователей для отчета',
+    description:
+      'Доступ только для администраторов' +
+      '<br> Отсчет дняй активности ведётся от текущих даты и ВРЕМЕНИ минус 30 суток',
+  })
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+    isArray: true,
+  })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @Get('report')
+  async generateReport(@Query() generateReportDto: GenerateReportDto) {
+    return this.userService.generateReport(generateReportDto);
+  }
+
+  @ApiOperation({
+    summary: 'Список всех пользователей',
+    description: 'Доступ только для администраторов',
+  })
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+    isArray: true,
+  })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @Get()
+  async findAll(): Promise<Omit<User, 'login' | 'password'>[]> {
+    try {
+      return await this.userService.findAll();
+    } catch (error) {
+      console.error('Ошибка при получении данных пользователей:', error);
+      throw new InternalServerErrorException('Произошла ошибка при получении данных пользователей');
     }
   }
 
@@ -191,8 +208,7 @@ export class UserController {
   @AdminPermissions(AdminPermission.CONFIRMATION)
   @Delete(':id')
   async deleteUser(@Param('id') id: string): Promise<void> {
-    const objectId = new ObjectId(id);
-    await this.userService.deleteUserById(objectId);
+    await this.userService.deleteUserById(id);
   }
 
   @ApiOperation({

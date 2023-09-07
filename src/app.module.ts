@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtService } from '@nestjs/jwt';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -13,6 +12,7 @@ import { HashModule } from './hash/hash.module';
 import { TasksWsModule } from './tasks-ws/tasks-ws.module';
 import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './users/user.module';
+import { BlogArticlesModule } from './blog-articles/blog-articles.module';
 
 @Module({
   imports: [
@@ -30,8 +30,9 @@ import { UserModule } from './users/user.module';
     TasksWsModule,
     HashModule,
     AuthModule,
+    BlogArticlesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtService],
+  providers: [AppService],
 })
 export class AppModule {}
